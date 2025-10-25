@@ -1,0 +1,11 @@
+{
+    "development": {
+        "username": "root",
+        "password": "hpx128535",
+        "host": "127.0.0.1",
+        "database": "praktikum_016_db",
+        "port": 3308,
+        "dialect": "mysql"
+        
+    }
+}
