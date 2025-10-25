@@ -1,8 +1,9 @@
-const { Presensi } = require("../models");
-const { format } = require("date-fns-tz");
-const timeZone = "Asia/Jakarta";
-
-exports.CheckIn = async (req, res) => {
+ 	// 1. Ganti sumber data dari array ke model Sequelize
+ 	const { Presensi } = require("../models");
+ 	const { format } = require("date-fns-tz");
+ 	const timeZone = "Asia/Jakarta";
+ 	
+ 	exports.CheckIn = async (req, res) => {
  	  // 2. Gunakan try...catch untuk error handling
  	  try {
  	    const { id: userId, nama: userName } = req.user;
@@ -44,7 +45,7 @@ exports.CheckIn = async (req, res) => {
  	  } catch (error) {
  	    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
  	  }
-};
+ 	};
  	
  	exports.CheckOut = async (req, res) => {
  	  // Gunakan try...catch
@@ -85,4 +86,4 @@ exports.CheckIn = async (req, res) => {
  	  } catch (error) {
  	    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
  	  }
-};
+ 	};

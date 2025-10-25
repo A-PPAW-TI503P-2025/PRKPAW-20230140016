@@ -9,6 +9,8 @@ const presensiRoutes = require("./routes/presensi");
 const reportRoutes = require("./routes/reports");
 
 // Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
@@ -26,3 +28,5 @@ app.use("/api/reports", reportRoutes);
 app.listen(PORT, () => {
   console.log(`Express server running at http://localhost:${PORT}/`);
 });
+const presensiRouter = require('./routes/presensi');
+app.use('/api/presensi', presensiRouter);
