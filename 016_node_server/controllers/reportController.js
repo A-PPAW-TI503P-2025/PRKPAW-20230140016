@@ -1,36 +1,41 @@
-const { Presensi, Sequelize } = require('../models');
-const { Op } = Sequelize;
+
+const { Presensi } = require("../models");
+const { Op } = require("sequelize");
 
 exports.getDailyReport = async (req, res) => {
   try {
-    // optional ?date=YYYY-MM-DD (local date)
-    const { date: dateParam } = req.query;
-    const base = dateParam ? new Date(`${dateParam}T00:00:00`) : new Date();
-    if (isNaN(base)) return res.status(400).json({ error: 'invalid date format' });
+    const { nama, tanggalMulai, tanggalSelesai } = req.query;
+    let options = { where: {} };
+    if (nama) {
+      options.where.nama = {
+        [Op.like]: `%${nama}%`,
+      };
+    }
+    // Tambahkan filter rentang tanggal berdasarkan kolom checkIn
+    if (tanggalMulai || tanggalSelesai) {
+      const start = tanggalMulai ? new Date(tanggalMulai) : null;
+      const end = tanggalSelesai ? new Date(tanggalSelesai) : null;
 
-    const startOfDay = new Date(base.getFullYear(), base.getMonth(), base.getDate());
-    const startOfNextDay = new Date(startOfDay);
-    startOfNextDay.setDate(startOfNextDay.getDate() + 1);
+      if (start && !isNaN(start)) start.setHours(0, 0, 0, 0);
+      if (end && !isNaN(end)) end.setHours(23, 59, 59, 999);
 
-    console.log('getDailyReport for', startOfDay.toISOString(), '->', startOfNextDay.toISOString());
-
-    const records = await Presensi.findAll({
-      where: {
-        checkIn: {
-          [Op.gte]: startOfDay,
-          [Op.lt]: startOfNextDay
-        }
-      },
-      order: [['checkIn', 'ASC']]
-    });
-
+      if (start && end) {
+        options.where.checkIn = { [Op.between]: [start, end] };
+      } else if (start) {
+        options.where.checkIn = { [Op.gte]: start };
+      } else if (end) {
+        options.where.checkIn = { [Op.lte]: end };
+      }
+    }
+    const records = await Presensi.findAll(options);
     res.json({
-      reportDate: startOfDay.toISOString().split('T')[0],
-      count: records.length,
-      data: records
+      message: "Laporan berhasil diambil.",
+      reportDate: new Date().toLocaleDateString(),
+      data: records,
     });
-  } catch (err) {
-    console.error('getDailyReport error:', err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil laporan", error: error.message });
   }
 };

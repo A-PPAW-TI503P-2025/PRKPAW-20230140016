@@ -87,3 +87,99 @@
  	    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
  	  }
  	};
+
+	exports.deletePresensi = async (req, res) => {
+    try {
+      const { id: userId } = req.user;
+      const presensiId = req.params.id;
+      const recordToDelete = await Presensi.findByPk(presensiId);
+      if (!recordToDelete) {
+        return res
+          .status(404)
+          .json({ message: "Catatan presensi tidak ditemukan." });
+      }
+     // Izinkan admin menghapus catatan siapa pun
+     const isAdmin = req.user && req.user.role === 'admin';
+     if (!isAdmin && recordToDelete.userId !== userId) {
+       return res
+         .status(403)
+         .json({ message: "Akses ditolak: Anda bukan pemilik catatan ini." });
+     }
+     await recordToDelete.destroy();
+     res.status(200).json({
+       message: "Catatan presensi berhasil dihapus.",
+       data: { id: presensiId }
+     });
+    } catch (error) {
+      res
+        .status(500)
+        .json({
+          message: "Terjadi kesalahan pada server",
+          error: error.message,
+        });
+    }
+  };
+
+exports.updatePresensi = async (req, res) => {
+  try {
+    const presensiId = req.params.id;
+    // Normalisasi dan validasi input tanggal (tanpa middleware tambahan)
+    if (req.body && req.body.waktuCheckIn !== undefined) {
+      const parsed = new Date(req.body.waktuCheckIn);
+      if (isNaN(parsed)) {
+        return res.status(400).json({ message: "waktuCheckIn harus berupa tanggal yang valid" });
+      }
+      req.body.checkIn = parsed;
+    }
+    if (req.body && req.body.waktuCheckOut !== undefined) {
+      const parsed = new Date(req.body.waktuCheckOut);
+      if (isNaN(parsed)) {
+        return res.status(400).json({ message: "waktuCheckOut harus berupa tanggal yang valid" });
+      }
+      req.body.checkOut = parsed;
+    }
+
+    // Jika user mengirim langsung checkIn/checkOut sebagai string, validasi juga
+    if (req.body && req.body.checkIn !== undefined) {
+      const parsed = new Date(req.body.checkIn);
+      if (isNaN(parsed)) {
+        return res.status(400).json({ message: "checkIn harus berupa tanggal yang valid" });
+      }
+      req.body.checkIn = parsed;
+    }
+    if (req.body && req.body.checkOut !== undefined) {
+      const parsed = new Date(req.body.checkOut);
+      if (isNaN(parsed)) {
+        return res.status(400).json({ message: "checkOut harus berupa tanggal yang valid" });
+      }
+      req.body.checkOut = parsed;
+    }
+
+    const { checkIn, checkOut, nama } = req.body;
+    if (checkIn === undefined && checkOut === undefined && nama === undefined) {
+      return res.status(400).json({
+        message:
+          "Request body tidak berisi data yang valid untuk diupdate (checkIn, checkOut, atau nama).",
+      });
+    }
+    const recordToUpdate = await Presensi.findByPk(presensiId);
+    if (!recordToUpdate) {
+      return res
+        .status(404)
+        .json({ message: "Catatan presensi tidak ditemukan." });
+    }
+    recordToUpdate.checkIn = checkIn || recordToUpdate.checkIn;
+    recordToUpdate.checkOut = checkOut || recordToUpdate.checkOut;
+    recordToUpdate.nama = nama || recordToUpdate.nama;
+    await recordToUpdate.save();
+    res.json({
+      message: "Data presensi berhasil diperbarui.",
+      data: recordToUpdate,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Terjadi kesalahan pada server", error: error.message });
+  }
+};
+
