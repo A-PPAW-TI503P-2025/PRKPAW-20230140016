@@ -27,8 +27,7 @@ function LoginPage() {
   };
   return (
     <div
-      className="min-h-screen bg-gray-100 flex flex-col items-center
-justify-center"
+      className="min-h-screen bg-gray-100 flex flex-col items-center justify-center"
     >
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
@@ -48,7 +47,7 @@ justify-center"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:borderblue-500"
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
@@ -64,7 +63,7 @@ justify-center"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:borderblue-500"
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <button
