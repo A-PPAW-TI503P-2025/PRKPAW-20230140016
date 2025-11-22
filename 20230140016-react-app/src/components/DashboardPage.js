@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Gunakan Named Import
+import Navbar from "./Navbar";
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -21,11 +22,6 @@ function DashboardPage() {
       navigate("/login");
     }
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   if (!userInfo) {
     return (
@@ -49,27 +45,13 @@ function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
-      <div className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <span>🚪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-8 mb-8 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-8 mb-8 text-white transform hover:scale-[1.01] transition-transform duration-300">
           <div className="flex items-center gap-4">
-            <div className="bg-white bg-opacity-20 rounded-full p-4 text-4xl">
+            <div className="bg-white bg-opacity-20 rounded-full p-4 text-4xl shadow-inner">
               {getRoleIcon(userInfo.role)}
             </div>
             <div>
@@ -77,95 +59,71 @@ function DashboardPage() {
                 Selamat Datang, {userInfo.nama || "User"}!
               </h2>
               <p className="text-blue-100 text-lg">
-                Anda telah berhasil masuk ke dashboard
+                Anda telah berhasil masuk ke dashboard sistem.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* User Info Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Role</p>
-                <p className="text-2xl font-bold text-gray-800 mt-2">
-                  {userInfo.role === "admin" ? "Admin" : "Mahasiswa"}
+                <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">
+                  Peran Pengguna
+                </p>
+                <p className="text-2xl font-bold text-gray-800 mt-2 capitalize">
+                  {userInfo.role}
                 </p>
               </div>
-              <div className="text-4xl">{getRoleIcon(userInfo.role)}</div>
+              <div className="text-4xl opacity-80">
+                {getRoleIcon(userInfo.role)}
+              </div>
             </div>
             <div className="mt-4">
               <span
-                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getRoleBadgeColor(
+                className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${getRoleBadgeColor(
                   userInfo.role
                 )}`}
               >
-                {userInfo.role === "admin" ? "Administrator" : "Student"}
+                {userInfo.role === "admin"
+                  ? "Administrator"
+                  : "Mahasiswa Aktif"}
               </span>
             </div>
           </div>
 
-          {/* User ID Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">User ID</p>
-                <p className="text-2xl font-bold text-gray-800 mt-2">
+                <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">
+                  User ID
+                </p>
+                <p className="text-2xl font-bold text-gray-800 mt-2 font-mono">
                   #{userInfo.id}
                 </p>
               </div>
-              <div className="text-4xl">🆔</div>
+              <div className="text-4xl opacity-80">🆔</div>
             </div>
+            <div className="mt-4 text-xs text-gray-400">ID Unik Sistem</div>
           </div>
 
-          {/* Status Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">Status</p>
+                <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">
+                  Status Akun
+                </p>
                 <p className="text-2xl font-bold text-green-600 mt-2">
-                  Aktif
+                  Terverifikasi
                 </p>
               </div>
-              <div className="text-4xl">✅</div>
+              <div className="text-4xl opacity-80">✅</div>
+            </div>
+            <div className="mt-4 text-xs text-green-600 font-semibold">
+              Akses Penuh Diberikan
             </div>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-left">
-              <span className="text-2xl">📊</span>
-              <div>
-                <p className="font-semibold text-gray-800">View Reports</p>
-                <p className="text-sm text-gray-600">Lihat laporan dan statistik</p>
-              </div>
-            </button>
-            <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-left">
-              <span className="text-2xl">📝</span>
-              <div>
-                <p className="font-semibold text-gray-800">Manage Data</p>
-                <p className="text-sm text-gray-600">Kelola data dan informasi</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Logout Section */}
-        <div className="mt-8 text-center">
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 px-8 py-3 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <span>🚪</span>
-            <span>Keluar dari Akun</span>
-          </button>
         </div>
       </div>
     </div>

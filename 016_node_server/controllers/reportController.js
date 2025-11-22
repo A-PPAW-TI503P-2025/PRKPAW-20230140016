@@ -1,17 +1,31 @@
-
-const { Presensi } = require("../models");
+const { Presensi, User } = require("../models");
 const { Op } = require("sequelize");
 
 exports.getDailyReport = async (req, res) => {
   try {
     const { nama, tanggalMulai, tanggalSelesai } = req.query;
-    let options = { where: {} };
+
+    let options = {
+      // Include tabel User untuk mendapatkan nama dan email
+      include: [
+        {
+          model: User,
+          as: "User",
+          attributes: ["nama", "email"],
+          where: {}, // Untuk filter nama
+        },
+      ],
+      where: {}, // Untuk filter tanggal presensi
+    };
+
+    // Filter berdasarkan Nama User
     if (nama) {
-      options.where.nama = {
+      options.include[0].where.nama = {
         [Op.like]: `%${nama}%`,
       };
     }
-    // Tambahkan filter rentang tanggal berdasarkan kolom checkIn
+
+    // Filter rentang tanggal Presensi
     if (tanggalMulai || tanggalSelesai) {
       const start = tanggalMulai ? new Date(tanggalMulai) : null;
       const end = tanggalSelesai ? new Date(tanggalSelesai) : null;
@@ -27,7 +41,9 @@ exports.getDailyReport = async (req, res) => {
         options.where.checkIn = { [Op.lte]: end };
       }
     }
+
     const records = await Presensi.findAll(options);
+
     res.json({
       message: "Laporan berhasil diambil.",
       reportDate: new Date().toLocaleDateString(),
