@@ -43,7 +43,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            {/* Logo selalu tampil, tapi link-nya bisa diatur */}
+            {/* Logo */}
             <Link
               to={user && !isAuthPage ? "/dashboard" : "/login"}
               className="text-xl font-bold text-blue-600 flex items-center gap-2"
@@ -62,13 +62,17 @@ const Navbar = () => {
                   Dashboard
                 </Link>
 
-                <Link
-                  to="/presensi"
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Presensi
-                </Link>
+                {/* Menu Presensi: HANYA TAMPIL JIKA ROLE MAHASISWA */}
+                {user.role === "mahasiswa" && (
+                  <Link
+                    to="/presensi"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Presensi
+                  </Link>
+                )}
 
+                {/* Menu Laporan: HANYA TAMPIL JIKA ROLE ADMIN */}
                 {user.role === "admin" && (
                   <Link
                     to="/reports"
@@ -82,7 +86,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Tombol Logout / User Info: Hanya tampil jika user login DAN BUKAN di halaman auth */}
+            {/* User Info & Logout */}
             {user && !isAuthPage ? (
               <>
                 <div className="text-right mr-2 hidden sm:block">
@@ -104,7 +108,7 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              /* Tombol Login/Register: Tampil jika belum login ATAU sedang di halaman auth */
+              /* Tombol Login/Register untuk halaman auth */
               <div className="flex space-x-2">
                 <Link
                   to="/login"
