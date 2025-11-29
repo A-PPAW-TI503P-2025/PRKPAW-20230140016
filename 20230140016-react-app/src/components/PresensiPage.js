@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+// Tambahkan import CSS Leaflet di file index.css atau App.css:
+// @import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Navbar from "./Navbar";
 
@@ -6,6 +9,48 @@ const PresensiPage = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [coords, setCoords] = useState(null); // {lat, lng}
+
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoords({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setError("Gagal mendapatkan lokasi: " + error.message);
+        }
+      );
+    } else {
+      setError("Geolocation tidak didukung oleh browser ini.");
+    }
+  };
+
+  // Dapatkan lokasi saat komponen dimuat
+  useEffect(() => {
+    getLocation();
+  }, []);
+
+  // Modifikasi handleCheckIn untuk mengirim lokasi
+  const handleCheckIn = async () => {
+    if (!coords) {
+      setError("Lokasi belum didapatkan. Mohon izinkan akses lokasi.");
+      return;
+    }
+    // ... (Logika axios dengan token) ...
+    // Kirim koordinat di body request:
+    const response = await axios.post(
+      ...{
+        latitude: coords.lat,
+        longitude: coords.lng, // <-- Data dikirim ke backend
+      },
+      config
+    );
+    // ...code lanjutan tidak diubah
+  };
 
   const getToken = () => {
     return localStorage.getItem("token");
@@ -81,6 +126,24 @@ const PresensiPage = () => {
             >
               <p className="font-bold">Gagal!</p>
               <p>{error}</p>
+            </div>
+          )}
+
+          {coords && (
+            <div className="my-4 border rounded-lg overflow-hidden">
+              <MapContainer
+                center={[coords.lat, coords.lng]}
+                zoom={15}
+                style={{ height: "300px", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[coords.lat, coords.lng]}>
+                  <Popup>Lokasi Presensi Anda</Popup>
+                </Marker>
+              </MapContainer>
             </div>
           )}
 

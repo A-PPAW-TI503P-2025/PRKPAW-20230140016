@@ -12,6 +12,7 @@ exports.CheckIn = async (req, res) => {
     }
 
     const { id: userId } = req.user;
+    const { latitude, longitude } = req.body;
     const waktuSekarang = new Date();
 
     console.log("Mencoba Check-In untuk UserID:", userId); // Debug Log
@@ -31,6 +32,8 @@ exports.CheckIn = async (req, res) => {
     const newRecord = await Presensi.create({
       userId: userId,
       checkIn: waktuSekarang,
+      latitude: latitude, // <-- Simpan ke database
+      longitude: longitude, // <-- Simpan ke database
     });
 
     // Ambil data user untuk response
@@ -119,12 +122,10 @@ exports.CheckOut = async (req, res) => {
     });
   } catch (error) {
     console.error("Error CheckOut:", error);
-    res
-      .status(500)
-      .json({
-        message: "Terjadi kesalahan pada server saat Check-Out",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server saat Check-Out",
+      error: error.message,
+    });
   }
 };
 
