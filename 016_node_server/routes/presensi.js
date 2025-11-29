@@ -5,6 +5,11 @@ const presensiController = require("../controllers/presensiController");
 const { authenticateToken } = require("../middleware/permissionMiddleware");
 const { body, validationResult } = require("express-validator");
 
+// Contoh di routes
+const reportController = require("../controllers/reportController");
+// ... middleware auth ...
+router.get("/presensi", authenticateToken, reportController.getReport);
+
 // Terapkan middleware autentikasi untuk semua route presensi
 router.use(authenticateToken);
 

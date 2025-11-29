@@ -2,6 +2,37 @@ const { Presensi, User } = require("../models");
 const { format } = require("date-fns-tz");
 const timeZone = "Asia/Jakarta";
 
+exports.getAllPresensi = async (req, res) => {
+  try {
+    const presensiData = await Presensi.findAll({
+      // Include User agar kita tahu siapa yang presensi
+      include: [
+        {
+          model: User,
+          as: "user", // Sesuaikan dengan alias di models/presensi.js (belongsTo)
+          attributes: ["id", "nama", "email", "role"], // Ambil data user seperlunya saja
+        },
+      ],
+      // Mengurutkan dari yang terbaru
+      order: [["checkIn", "DESC"]],
+      // Pastikan tidak ada properti 'attributes' yang membatasi kolom.
+      // Jika Anda ingin spesifik, pastikan latitude dan longitude dimasukkan:
+      // attributes: ['id', 'userId', 'checkIn', 'checkOut', 'latitude', 'longitude']
+    });
+
+    res.status(200).json({
+      message: "Berhasil mengambil data laporan presensi",
+      data: presensiData,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Gagal mengambil data presensi",
+      error: error.message,
+    });
+  }
+};
+
 exports.CheckIn = async (req, res) => {
   try {
     // Pastikan req.user ada

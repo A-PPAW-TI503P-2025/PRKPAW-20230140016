@@ -1,151 +1,175 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 
 const ReportPage = () => {
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [reportData, setReportData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filterNama, setFilterNama] = useState("");
-  const navigate = useNavigate();
 
-  const fetchReports = async () => {
-    setLoading(true);
+  useEffect(() => {
+    fetchReportData();
+  }, []);
+
+  const fetchReportData = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Anda belum login (Token tidak ditemukan).");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
+      // Sesuaikan endpoint dengan backend Anda
+      // Biasanya GET /api/presensi untuk admin mengambil semua data
+      const response = await axios.get("http://localhost:3001/api/presensi", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      // Request ke endpoint report dengan filter nama
-      const response = await axios.get(
-        "http://localhost:3001/api/reports/daily",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            nama: filterNama,
-          },
-        }
-      );
-
-      setReports(response.data.data);
-      setError("");
+      // Pastikan struktur response data sesuai (response.data.data atau response.data)
+      setReportData(response.data.data || response.data);
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Gagal mengambil laporan.");
+      console.error("Error fetching report:", err);
+      setError(err.response?.data?.message || "Gagal mengambil data laporan.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchReports();
-    // Baris komentar eslint-disable dihapus untuk mencegah error
-  }, []);
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchReports();
+  const formatTime = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          Laporan Presensi Harian
-        </h1>
 
-        {/* Search Filter */}
-        <form onSubmit={handleSearch} className="mb-6 flex gap-2">
-          <input
-            type="text"
-            placeholder="Cari berdasarkan nama..."
-            value={filterNama}
-            onChange={(e) => setFilterNama(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow max-w-md"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Cari
-          </button>
-        </form>
-
-        {/* Error Message */}
-        {error && (
-          <div
-            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6"
-            role="alert"
-          >
-            <p>{error}</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+            <h2 className="text-xl font-bold text-gray-800">
+              Laporan Presensi Seluruh Pegawai
+            </h2>
+            <button
+              onClick={fetchReportData}
+              className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+            >
+              Refresh Data
+            </button>
           </div>
-        )}
 
-        {/* Table */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center text-gray-500">Memuat data...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nama
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Waktu Check-In
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Waktu Check-Out
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {reports.length > 0 ? (
-                    reports.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.User ? item.User.nama : "Unknown"}
-                        </td>
+          <div className="p-6">
+            {loading ? (
+              <div className="text-center py-10">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <p className="mt-2 text-gray-500">Memuat data...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                <p className="font-bold">Error</p>
+                <p>{error}</p>
+              </div>
+            ) : reportData.length === 0 ? (
+              <div className="text-center py-10 text-gray-500">
+                Belum ada data presensi yang terekam.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nama User
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tanggal
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Jam Masuk
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Jam Pulang
+                      </th>
+                      {/* Kolom Baru: Latitude & Longitude */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Latitude
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Longitude
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {reportData.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(item.checkIn).toLocaleString("id-ID", {
-                            timeZone: "Asia/Jakarta",
-                          })}
+                          {index + 1}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.user ? item.user.nama : "User Tidak Dikenal"}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            ID: {item.userId}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {formatDate(item.checkIn)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            {formatTime(item.checkIn)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           {item.checkOut ? (
-                            new Date(item.checkOut).toLocaleString("id-ID", {
-                              timeZone: "Asia/Jakarta",
-                            })
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                              {formatTime(item.checkOut)}
+                            </span>
                           ) : (
-                            <span className="text-yellow-600 italic">
+                            <span className="text-xs text-gray-400 italic">
                               Belum Check-out
                             </span>
                           )}
                         </td>
+
+                        {/* Menampilkan Data Lokasi */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                          {item.latitude || "-"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                          {item.longitude || "-"}
+                        </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className="px-6 py-4 text-center text-sm text-gray-500"
-                      >
-                        Tidak ada data presensi ditemukan.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-// Tambahkan import CSS Leaflet di file index.css atau App.css:
-// @import 'leaflet/dist/leaflet.css';
+import L from "leaflet";
 import axios from "axios";
 import Navbar from "./Navbar";
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 const PresensiPage = () => {
   const [message, setMessage] = useState("");
