@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       // Relasi Presensi milik satu User
       Presensi.belongsTo(models.User, {
         foreignKey: "userId",
-        as: "User",
+        as: "user",
       });
     }
   }
@@ -23,6 +23,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       checkOut: {
         type: DataTypes.DATE,
+        allowNull: true,
+      },
+      // Definisi Kolom Lokasi
+      latitude: {
+        type: DataTypes.DECIMAL(10, 8),
+        allowNull: true,
+      },
+      longitude: {
+        type: DataTypes.DECIMAL(11, 8),
         allowNull: true,
       },
     },

@@ -9,6 +9,8 @@ const presensiRoutes = require("./routes/presensi");
 const reportRoutes = require("./routes/reports");
 const authRoutes = require("./routes/auth");
 
+// Routes baru dipanggil SETELAH baris di atas
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,6 +32,5 @@ app.use("/api/auth", authRoutes);
 app.listen(PORT, () => {
   console.log(`Express server running at http://localhost:${PORT}/`);
 });
-const presensiRouter = require('./routes/presensi');
-app.use('/api/presensi', presensiRouter);
-
+const presensiRouter = require("./routes/presensi");
+app.use("/api/presensi", presensiRouter);

@@ -78,6 +78,8 @@ exports.CheckIn = async (req, res) => {
         timeZone,
       }),
       checkOut: null,
+      latitude: newRecord.latitude,
+      longitude: newRecord.longitude,
     };
 
     res.status(201).json({

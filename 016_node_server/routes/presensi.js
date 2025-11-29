@@ -8,13 +8,18 @@ const { body, validationResult } = require("express-validator");
 // Contoh di routes
 const reportController = require("../controllers/reportController");
 // ... middleware auth ...
-router.get("/presensi", authenticateToken, reportController.getReport);
+router.get("/", authenticateToken, reportController.getReport);
 
 // Terapkan middleware autentikasi untuk semua route presensi
 router.use(authenticateToken);
 
-router.post("/check-in", presensiController.CheckIn);
-router.post("/check-out", presensiController.CheckOut);
+// Route Check-in
+// URL Akhir: POST /api/presensi/check-in
+router.post("/check-in", authenticateToken, presensiController.CheckIn);
+
+// Route Check-out
+// URL Akhir: POST /api/presensi/check-out
+router.post("/check-out", authenticateToken, presensiController.CheckOut);
 
 router.put(
   "/:id",
