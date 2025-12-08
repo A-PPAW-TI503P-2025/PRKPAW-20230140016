@@ -189,22 +189,31 @@ const ReportPage = () => {
                         {/* Tombol Preview di kanan kolom lokasi */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                           {item.buktiFotoUrl ||
+                          item.photoUrl ||
                           item.buktiFoto ||
-                          item.photoUrl ? (
-                            <button
-                              onClick={() =>
-                                openPreview(
+                          item.photo ? (
+                            <div className="flex justify-end">
+                              <img
+                                src={
                                   item.buktiFotoUrl ||
-                                    item.photoUrl ||
-                                    `http://localhost:3001/uploads/${
-                                      item.buktiFoto || item.photo
-                                    }`
-                                )
-                              }
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                            >
-                              Preview
-                            </button>
+                                  item.photoUrl ||
+                                  `http://localhost:3001/uploads/${
+                                    item.buktiFoto || item.photo
+                                  }`
+                                }
+                                alt="thumbnail"
+                                className="w-14 h-14 object-cover rounded border cursor-pointer"
+                                onClick={() =>
+                                  openPreview(
+                                    item.buktiFotoUrl ||
+                                      item.photoUrl ||
+                                      `http://localhost:3001/uploads/${
+                                        item.buktiFoto || item.photo
+                                      }`
+                                  )
+                                }
+                              />
+                            </div>
                           ) : (
                             <span className="text-xs text-gray-400">
                               No Photo
