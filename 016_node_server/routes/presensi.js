@@ -1,26 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const presensiController = require("../controllers/presensiController");
-// Gunakan authenticateToken bukan addUserData
+const reportController = require("../controllers/reportController");
 const { authenticateToken } = require("../middleware/permissionMiddleware");
 const { body, validationResult } = require("express-validator");
 
-// Contoh di routes
-const reportController = require("../controllers/reportController");
-// ... middleware auth ...
+// gunakan upload dari controller
+const upload = presensiController.upload;
+
+// POST /api/presensi/check-in
+router.post(
+  "/check-in",
+  authenticateToken,
+  upload.single("photo"), // pastikan frontend pakai formData.append('photo', ...)
+  presensiController.checkIn
+);
+
+// POST /api/presensi/check-out
+router.post(
+  "/check-out",
+  authenticateToken,
+  upload.single("photo"), // optional, jika checkout kirim foto juga
+  presensiController.checkOut
+);
+
+// GET semua presensi / laporan (dilatih dengan autentikasi)
 router.get("/", authenticateToken, reportController.getReport);
 
-// Terapkan middleware autentikasi untuk semua route presensi
-router.use(authenticateToken);
-
-// Route Check-in
-// URL Akhir: POST /api/presensi/check-in
-router.post("/check-in", authenticateToken, presensiController.CheckIn);
-
-// Route Check-out
-// URL Akhir: POST /api/presensi/check-out
-router.post("/check-out", authenticateToken, presensiController.CheckOut);
-
+// PUT update presensi dengan validasi mapping waktu
 router.put(
   "/:id",
   [
@@ -39,7 +46,6 @@ router.put(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      // Mapping nama field dari request body ke field database
       if (req.body.waktuCheckIn !== undefined) {
         req.body.checkIn = req.body.waktuCheckIn;
       }
@@ -52,6 +58,7 @@ router.put(
   presensiController.updatePresensi
 );
 
-router.delete("/:id", presensiController.deletePresensi);
+// DELETE presensi
+router.delete("/:id", authenticateToken, presensiController.deletePresensi);
 
 module.exports = router;

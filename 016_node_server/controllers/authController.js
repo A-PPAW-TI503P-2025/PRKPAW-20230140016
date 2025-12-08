@@ -46,18 +46,14 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Password salah." });
     }
+    // mis. setelah verifikasi password:
     const payload = {
       id: user.id,
       nama: user.nama,
-      role: user.role,
+      role: user.role, // pastikan role disertakan
     };
-    const token = jwt.sign(payload, JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    res.json({
-      message: "Login berhasil",
-      token: token,
-    });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "8h" });
+    return res.json({ message: "Login berhasil", token });
   } catch (error) {
     res
       .status(500)

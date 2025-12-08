@@ -6,30 +6,43 @@ const ReportPage = () => {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     fetchReportData();
   }, []);
 
   const fetchReportData = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Anda belum login (Token tidak ditemukan).");
-      setLoading(false);
-      return;
-    }
-
+    setLoading(true);
     try {
-      // Sesuaikan endpoint dengan backend Anda
-      // Biasanya GET /api/presensi untuk admin mengambil semua data
       const response = await axios.get("http://localhost:3001/api/presensi", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      console.log("raw report response:", response.data);
+
+      const payload = response.data && (response.data.data || response.data);
+      const arr = Array.isArray(payload) ? payload : [];
+
+      const base = "http://localhost:3001/uploads";
+      const normalized = arr.map((it) => {
+        const plain = it.dataValues ? it.dataValues : it;
+        // cari nama file di beberapa kemungkinan field
+        let filename =
+          plain.buktiFoto ||
+          plain.photo ||
+          plain.foto ||
+          plain.fileName ||
+          (plain.dataValues &&
+            (plain.dataValues.buktiFoto || plain.dataValues.photo)) ||
+          null;
+        if (filename && !filename.includes(".")) filename = `${filename}.jpg`;
+
+        const photoUrl = filename ? `${base}/${filename}` : null;
+        return { ...plain, buktiFotoUrl: photoUrl, photoUrl };
       });
 
-      // Pastikan struktur response data sesuai (response.data.data atau response.data)
-      setReportData(response.data.data || response.data);
+      setReportData(normalized);
     } catch (err) {
       console.error("Error fetching report:", err);
       setError(err.response?.data?.message || "Gagal mengambil data laporan.");
@@ -55,6 +68,15 @@ const ReportPage = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const openPreview = (url) => {
+    setPreviewImage(url);
+    setPreviewOpen(true);
+  };
+  const closePreview = () => {
+    setPreviewImage(null);
+    setPreviewOpen(false);
   };
 
   return (
@@ -163,6 +185,32 @@ const ReportPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
                           {item.longitude || "-"}
                         </td>
+
+                        {/* Tombol Preview di kanan kolom lokasi */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                          {item.buktiFotoUrl ||
+                          item.buktiFoto ||
+                          item.photoUrl ? (
+                            <button
+                              onClick={() =>
+                                openPreview(
+                                  item.buktiFotoUrl ||
+                                    item.photoUrl ||
+                                    `http://localhost:3001/uploads/${
+                                      item.buktiFoto || item.photo
+                                    }`
+                                )
+                              }
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                            >
+                              Preview
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">
+                              No Photo
+                            </span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -172,6 +220,33 @@ const ReportPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal preview */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
+          onClick={closePreview}
+        >
+          <div
+            className="bg-white rounded overflow-hidden max-w-[90vw] max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={previewImage}
+              alt="preview"
+              className="max-w-full max-h-[80vh] block"
+            />
+            <div className="p-2 text-right">
+              <button
+                onClick={closePreview}
+                className="px-3 py-1 bg-gray-800 text-white rounded"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

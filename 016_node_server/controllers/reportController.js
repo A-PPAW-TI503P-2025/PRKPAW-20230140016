@@ -6,6 +6,15 @@ exports.getReport = async (req, res) => {
     // Mengambil semua data presensi
     const reports = await Presensi.findAll({
       // Include User agar nama pegawai muncul, bukan cuma userId
+      attributes: [
+        "id",
+        "userId",
+        "checkIn",
+        "checkOut",
+        "latitude",
+        "longitude",
+        "buktiFoto",
+      ],
       include: [
         {
           model: User,
