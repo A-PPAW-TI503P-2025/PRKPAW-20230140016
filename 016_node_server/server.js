@@ -9,6 +9,7 @@ const path = require("path");
 const presensiRoutes = require("./routes/presensi");
 const reportRoutes = require("./routes/reports");
 const authRoutes = require("./routes/auth");
+const iotRoutes = require("./routes/iot");
 
 // Routes baru dipanggil SETELAH baris di atas
 
@@ -36,3 +37,10 @@ app.listen(PORT, () => {
 });
 const presensiRouter = require("./routes/presensi");
 app.use("/api/presensi", presensiRouter);
+
+app.use("/api/iot", iotRoutes);
+app.post("/api/iot/ping", (req, res) => {
+  const { message, deviceId } = req.body;
+  console.log(`📡 [IOT] Pesan dari ${deviceId}: ${message}`);
+  res.status(200).json({ status: "ok", reply: "Server menerima koneksi!" });
+});
