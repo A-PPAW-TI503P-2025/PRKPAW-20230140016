@@ -11,6 +11,7 @@ import RegisterPage from "./components/RegisterPage";
 import DashboardPage from "./components/DashboardPage";
 import PresensiPage from "./components/PresensiPage";
 import ReportPage from "./components/ReportPage";
+import SensorPage from "./components/SensorPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/presensi" element={<PresensiPage />} />
         <Route path="/reports" element={<ReportPage />} />
+        <Route path="/monitoring" element={<SensorPage />} />
 
         {/* Redirect root ke login */}
         <Route path="/" element={<Navigate to="/login" replace />} />

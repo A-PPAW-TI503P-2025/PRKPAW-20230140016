@@ -81,6 +81,13 @@ const Navbar = () => {
                     <span>📊</span> Laporan Admin
                   </Link>
                 )}
+
+                <Link
+                  to="/monitoring"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Monitoring Suhu
+                </Link>
               </div>
             )}
           </div>

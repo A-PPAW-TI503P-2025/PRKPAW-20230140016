@@ -34,9 +34,22 @@ const PresensiPage = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setError("");
         },
         (error) => {
-          setError("Gagal mendapatkan lokasi: " + error.message);
+          // Tangani berbagai kode error agar pesan lebih informatif
+          if (error.code === 1) {
+            // PERMISSION_DENIED
+            setError(
+              "Gagal mendapatkan lokasi: Izin lokasi ditolak oleh pengguna."
+            );
+          } else if (error.code === 2) {
+            setError("Gagal mendapatkan lokasi: Posisi tidak tersedia.");
+          } else if (error.code === 3) {
+            setError("Gagal mendapatkan lokasi: Timeout saat meminta lokasi.");
+          } else {
+            setError("Gagal mendapatkan lokasi: " + error.message);
+          }
         }
       );
     } else {
@@ -185,6 +198,32 @@ const PresensiPage = () => {
             >
               <p className="font-bold">Gagal!</p>
               <p>{error}</p>
+
+              {/* Jika error karena izin ditolak, tampilkan instruksi singkat + tombol coba lagi */}
+              {error.toLowerCase().includes("izin") ||
+              error.toLowerCase().includes("ditolak") ||
+              error.toLowerCase().includes("denied") ? (
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={getLocation}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+                  >
+                    Coba Lagi
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      // Buka petunjuk singkat: user harus izin lewat ikon kunci di address bar
+                      setError(
+                        "Izin lokasi dibutuhkan. Klik ikon kunci (🔒) di address bar → Site settings → Location → Allow, lalu tekan 'Coba Lagi'."
+                      );
+                    }}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm"
+                  >
+                    Cara Mengizinkan
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
 
